@@ -141,8 +141,8 @@ These headers route DOOM includes to the local freestanding shim layer.
 ### Assets and docs
 
 - `assets/DOOM1.WAD` DOOM game data module copied into the boot ISO.
-- `audio/bootchime.voc` legacy boot chime asset; currently unused in runtime.
-- `docs/AUDIO.md` historical audio backend notes; stale after audio subsystem removal.
+- `audio/bootchime.voc` optional asset file; currently unused in runtime.
+- `docs/AUDIO.md` current audio status document (audio is not implemented in this build).
 
 ### External upstream code
 

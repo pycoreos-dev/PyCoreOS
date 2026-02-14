@@ -6,11 +6,12 @@ PyCoreOS is a 32-bit educational operating system project with a custom kernel, 
 
 - Version: `0.1.0-beta.1`
 - Channel: `public-beta`
-- Codename: `project-1489`
+- Codename: `first-light`
 
 ## What It Includes
 
 - Custom kernel entry, interrupts, timing, and device initialization
+- GDT/IDT/TSS setup with kernel/user ring segments and a ring-3 desktop tick path
 - Graphical desktop interface with window management and app launcher
 - Built-in terminal/CLI with file and system commands
 - In-memory filesystem with persistence snapshot support
@@ -37,4 +38,5 @@ Follow the exact setup and command order in:
 ## Notes
 
 - The ISO build expects `assets/DOOM1.WAD`; if missing, a placeholder WAD is generated.
+- Audio output is currently not implemented; `audio/bootchime.voc` remains as an asset only.
 - This repo is an educational beta and may include unfinished components.

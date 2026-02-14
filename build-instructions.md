@@ -1,10 +1,10 @@
 # PyCoreOS Build Instructions
 
-## 1) Install `make` first
+## 1) Install base tools
 
 ```bash
 sudo apt-get update
-sudo apt-get install -y make
+sudo apt-get install -y python3 make
 ```
 
 ## 2) Install project dependencies
@@ -29,4 +29,16 @@ make iso
 
 ```bash
 make run
+```
+
+## 6) (Optional) Headless boot test
+
+```bash
+make test
+```
+
+## 7) (Optional) Build beta release bundle
+
+```bash
+make beta
 ```
