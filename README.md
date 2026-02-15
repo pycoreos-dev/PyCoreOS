@@ -4,9 +4,9 @@ PyCoreOS is a 32-bit educational operating system project with a custom kernel, 
 
 ## Release
 
-- Version: `0.1.0-beta.1`
+- Version: `0.1.8-beta.9`
 - Channel: `public-beta`
-- Codename: `first-light`
+- Codename: `project-11176`
 
 ## What It Includes
 
