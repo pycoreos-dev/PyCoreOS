@@ -13,8 +13,8 @@ static uint8_t s_bpp = 0;
 static bool s_ready = false;
 
 enum {
-    kScreenWidth = 1280,
-    kScreenHeight = 720,
+    kScreenWidth = 1024,
+    kScreenHeight = 768,
     kScreenBpp = 32,
 };
 

@@ -27,9 +27,9 @@
 #define DOOM_HEIGHT 200
 
 /* ARGB8888 output buffer — upscaled to fit framebuffer */
-/* Max supported: 1280x720, each DOOM pixel maps to 3x */
-#define MAX_FB_WIDTH  1280
-#define MAX_FB_HEIGHT 720
+/* Match current framebuffer target mode (1024x768). */
+#define MAX_FB_WIDTH  1024
+#define MAX_FB_HEIGHT 768
 
 static uint32_t s_argb_buffer[MAX_FB_WIDTH * MAX_FB_HEIGHT];
 

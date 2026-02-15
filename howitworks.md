@@ -4,7 +4,7 @@ This document explains how the OS works and what each project file does.
 
 ## Runtime flow
 
-1. GRUB loads the kernel from `boot/grub/grub.cfg` and jumps into `boot/boot.s`.
+1. Limine loads the Multiboot1 kernel using `boot/limine.conf` and jumps into `boot/boot.s`.
 2. `boot/boot.s` sets CPU state and calls `kernel_main` in `kernel/src/main.cpp`.
 3. `kernel_main` initializes core services and devices (interrupts, input, display, storage, network, filesystem, desktop, CLI).
 4. The kernel enters the main loop and repeatedly:
@@ -27,7 +27,8 @@ This document explains how the OS works and what each project file does.
 
 ### Root
 
-- `Makefile` build entrypoints: `build`, `iso`, `run`, `test`, `clean`, `install-deps`.
+- `Makefile` primary build system with direct compile/link/ISO/run/test/release targets.
+- `SConstruct` optional SCons frontend that exposes the same targets as Make.
 - `README.md` project overview and contributor-facing orientation.
 - `build-instructions.md` exact step-by-step local build/run commands.
 - `howitworks.md` this architecture and file map document.
@@ -36,12 +37,14 @@ This document explains how the OS works and what each project file does.
 
 - `boot/boot.s` low-level bootstrap and kernel entry handoff.
 - `boot/linker.ld` kernel memory layout and section placement.
-- `boot/grub/grub.cfg` GRUB menu entry and multiboot kernel module setup.
+- `boot/limine.conf` Limine boot entry and kernel path (Multiboot1 kernel-only handoff).
 
-### Build and release scripts
+### Build orchestration
 
-- `scripts/build.py` main build tool (compile, link, ISO creation, run, headless test).
-- `scripts/release.py` beta bundle creator (ISO copy, metadata, checksums, tarball).
+- `Makefile` handles object compilation, kernel link, Limine ISO packaging, QEMU run/test, and beta bundle generation.
+- `third_party/limine/` provides vendored Limine boot binaries and `limine.c` for building the host-side install tool.
+- `Makefile` is the primary path and does not require Python.
+- `SConstruct` offers an optional command surface (`scons build`, `scons iso`, etc.) while reusing the Makefile logic.
 
 ### Kernel headers
 
@@ -61,12 +64,13 @@ This document explains how the OS works and what each project file does.
 ### Kernel sources
 
 - `kernel/src/main.cpp` system bring-up, main event loop, and ring-3 desktop tick dispatch.
+- `kernel/src/main.cpp` also imports embedded `DOOM1.WAD` from linked binary symbols into the virtual filesystem.
 - `kernel/src/interrupts.c` GDT/IDT/TSS setup, interrupt plumbing, and ring-3 trampoline/return path.
 - `kernel/src/console.c` VGA text-mode console rendering.
 - `kernel/src/display.c` display backend selection and framebuffer draw path.
 - `kernel/src/serial.c` COM serial initialization and writes.
 - `kernel/src/timing.c` timing calibration and sleep/tick helpers.
-- `kernel/src/filesystem.c` RAM filesystem, boot-module import, and serialization.
+- `kernel/src/filesystem.c` RAM filesystem, optional boot-module import, and serialization.
 - `kernel/src/fs_persist.c` save/load serialized filesystem image via ATA sectors.
 - `kernel/src/cli.c` shell command parser and implementations.
 - `kernel/src/net_stack.c` small ARP/IPv4/ICMP stack over RTL8139 driver.
@@ -140,11 +144,26 @@ These headers route DOOM includes to the local freestanding shim layer.
 
 ### Assets and docs
 
-- `assets/DOOM1.WAD` DOOM game data module copied into the boot ISO.
+- `assets/DOOM1.WAD` DOOM game data linked into the kernel image at build time; also copied into ISO payload during `make iso`.
 - `audio/bootchime.voc` optional asset file; currently unused in runtime.
 - `docs/AUDIO.md` current audio status document (audio is not implemented in this build).
 
+## Platform compatibility targets
+
+- Bochs: BIOS ISO boot target.
+- VirtualBox: BIOS and UEFI ISO boot targets.
+- VMware: BIOS and UEFI ISO boot targets.
+- Lenovo ThinkPad X390: UEFI x64 ISO boot target.
+
+Current device support limits:
+
+- Graphics path depends on Multiboot framebuffer/VBE handoff.
+- Current default mode target is `1024x768x32`.
+- Input stack is PS/2 keyboard/mouse focused.
+- Persistence path uses ATA PIO only (no AHCI/NVMe persistence yet).
+- CLI command surface is Linux-style (for example `clear`, `logout`) without Windows command aliases.
+
 ### External upstream code
 
-- `third_party/doom/*` upstream DOOM engine sources compiled by `scripts/build.py`.
+- `third_party/doom/*` upstream DOOM engine sources compiled by the Makefile/SCons build path.
   PyCoreOS-specific behavior is added via files under `doom/src/` and `doom/include/`.

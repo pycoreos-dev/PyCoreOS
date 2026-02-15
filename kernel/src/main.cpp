@@ -17,6 +17,9 @@
 #include "kernel/serial.h"
 #include "kernel/timing.h"
 
+extern "C" unsigned char _binary_assets_DOOM1_WAD_start[];
+extern "C" unsigned char _binary_assets_DOOM1_WAD_end[];
+
 static void copy_module_name(char* out, unsigned int out_cap, const char* source) {
     if (out == nullptr || out_cap == 0U) {
         return;
@@ -79,6 +82,17 @@ static void import_multiboot_modules(unsigned int multiboot_info_addr) {
         copy_module_name(name, sizeof(name), mod_string);
         (void)fs_import_module(name, data, (size_t)size);
     }
+}
+
+static void import_embedded_doom_wad(void) {
+    const unsigned char* wad_start = _binary_assets_DOOM1_WAD_start;
+    const unsigned char* wad_end = _binary_assets_DOOM1_WAD_end;
+    if (wad_end <= wad_start) {
+        return;
+    }
+
+    const size_t wad_size = (size_t)(wad_end - wad_start);
+    (void)fs_import_module("DOOM1.WAD", wad_start, wad_size);
 }
 
 static inline unsigned char inb(unsigned short port) {
@@ -168,6 +182,7 @@ extern "C" void kernel_main(unsigned int multiboot_magic, unsigned int multiboot
     fs_init();
     fs_persist_init();
     (void)fs_load_from_disk();
+    import_embedded_doom_wad();
     import_multiboot_modules(multiboot_info_addr);
     doom_bridge_init();
     desktop_init();

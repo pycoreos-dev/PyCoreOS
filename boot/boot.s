@@ -5,8 +5,8 @@
 .set MAGIC,    0x1BADB002
 .set CHECKSUM, -(MAGIC + FLAGS)
 .set MODE_TYPE, 0
-.set MODE_WIDTH, 1280
-.set MODE_HEIGHT, 720
+.set MODE_WIDTH, 1024
+.set MODE_HEIGHT, 768
 .set MODE_DEPTH, 32
 
 .section .text
@@ -27,7 +27,7 @@
 .section .bss
 .align 16
 stack_bottom:
-.skip 16384
+.skip 262144
 stack_top:
 
 .section .text
@@ -46,4 +46,4 @@ _start:
     hlt
     jmp .hang
 
-.section .note.GNU-stack,"",@progbits
+

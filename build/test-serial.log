@@ -1,0 +1,4 @@
+[BOOT] kernel entry
+[BOOT] PyCoreOS 0.1.0-beta.1 (public-beta)
+PYCOREOS_BOOT_OK
+qemu-system-i386: terminating on signal 15 from pid 22556 (timeout)

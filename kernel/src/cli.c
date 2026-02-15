@@ -416,7 +416,7 @@ void cli_init(void) {
     desktop_append_log("clip todo journal apps open resmode calc history");
     desktop_append_log("display mouse fsinfo meminfo netinfo sysinfo savefs loadfs ping");
     desktop_append_log("betareport clear doom");
-    desktop_append_log("power: sleep logout/signout/logoff restart shutdown");
+    desktop_append_log("power: sleep logout restart shutdown");
 }
 
 cli_action cli_execute(const char* line) {
@@ -435,7 +435,7 @@ cli_action cli_execute(const char* line) {
         desktop_append_log("workspace: clip/todo/journal/apps/open/resmode/calc");
         desktop_append_log("system: display/mouse/fsinfo/meminfo/netinfo/sysinfo");
         desktop_append_log("persist: savefs/loadfs/sync/save betareport ping clear doom");
-        desktop_append_log("power: sleep/logout/signout/logoff/restart/shutdown");
+        desktop_append_log("power: sleep/logout/restart/shutdown");
         return CLI_ACTION_NONE;
     }
 
@@ -1117,7 +1117,7 @@ cli_action cli_execute(const char* line) {
         return CLI_ACTION_NONE;
     }
 
-    if (str_eq(p, "logout") || str_eq(p, "signout") || str_eq(p, "logoff")) {
+    if (str_eq(p, "logout")) {
         desktop_append_log("logout: returning to sign-in screen");
         desktop_logout_session();
         return CLI_ACTION_NONE;
@@ -1379,7 +1379,7 @@ cli_action cli_execute(const char* line) {
         return CLI_ACTION_NONE;
     }
 
-    if (str_eq(p, "clear") || str_eq(p, "cls")) {
+    if (str_eq(p, "clear")) {
         desktop_clear_log();
         return CLI_ACTION_NONE;
     }

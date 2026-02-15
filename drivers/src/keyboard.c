@@ -9,7 +9,17 @@ static inline uint8_t inb(uint16_t port) {
     return result;
 }
 
+static void drain_output(void) {
+    for (int i = 0; i < 64; ++i) {
+        if ((inb(0x64) & 0x01U) == 0) {
+            break;
+        }
+        (void)inb(0x60);
+    }
+}
+
 void keyboard_init(void) {
+    drain_output();
 }
 
 static bool s_shift = false;
@@ -59,47 +69,53 @@ static char scancode_to_ascii_us_qwerty(uint8_t sc, bool shift, bool caps_lock) 
 }
 
 bool keyboard_read_char(char* out) {
-    uint8_t status = inb(0x64);
-    if ((status & 0x01) == 0) {
-        return false;
-    }
-    if ((status & 0x20) != 0) {
-        return false;
+    for (int i = 0; i < 16; ++i) {
+        uint8_t status = inb(0x64);
+        if ((status & 0x01U) == 0) {
+            return false;
+        }
+
+        uint8_t sc = inb(0x60);
+        if ((status & 0x20U) != 0) {
+            /* AUX (mouse) byte: discard so mouse data cannot block keyboard input. */
+            continue;
+        }
+
+        if (sc == 0xE0 || sc == 0xE1) {
+            s_extended_prefix = true;
+            continue;
+        }
+
+        bool released = (sc & 0x80U) != 0;
+        uint8_t code = (uint8_t)(sc & 0x7FU);
+
+        if (s_extended_prefix) {
+            s_extended_prefix = false;
+            continue;
+        }
+
+        if (code == 0x2AU || code == 0x36U) {
+            s_shift = !released;
+            continue;
+        }
+
+        if (!released && code == 0x3AU) {
+            s_caps_lock = !s_caps_lock;
+            continue;
+        }
+
+        if (released) {
+            continue;
+        }
+
+        char c = scancode_to_ascii_us_qwerty(code, s_shift, s_caps_lock);
+        if (c == 0) {
+            continue;
+        }
+
+        *out = c;
+        return true;
     }
 
-    uint8_t sc = inb(0x60);
-    if (sc == 0xE0 || sc == 0xE1) {
-        s_extended_prefix = true;
-        return false;
-    }
-
-    bool released = (sc & 0x80) != 0;
-    uint8_t code = (uint8_t)(sc & 0x7F);
-
-    if (s_extended_prefix) {
-        s_extended_prefix = false;
-        return false;
-    }
-
-    if (code == 0x2A || code == 0x36) {
-        s_shift = !released;
-        return false;
-    }
-
-    if (!released && code == 0x3A) {
-        s_caps_lock = !s_caps_lock;
-        return false;
-    }
-
-    if (released) {
-        return false;
-    }
-
-    char c = scancode_to_ascii_us_qwerty(code, s_shift, s_caps_lock);
-    if (c == 0) {
-        return false;
-    }
-
-    *out = c;
-    return true;
+    return false;
 }

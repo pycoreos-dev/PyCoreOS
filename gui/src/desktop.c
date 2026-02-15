@@ -15,8 +15,8 @@
 #include <stdint.h>
 
 enum {
-    kScreenWidth = 1280,
-    kScreenHeight = 720,
+    kScreenWidth = 1024,
+    kScreenHeight = 768,
     kBackbufferMaxW = kScreenWidth,
     kBackbufferMaxH = kScreenHeight,
     kLogLines = 256,
@@ -1560,6 +1560,23 @@ static void queue_command(const char* cmd) {
     }
     echo[i] = '\0';
     log_push_line(echo);
+}
+
+static void queue_doom_launch_action(void) {
+    if (!session_logged_in()) {
+        log_push_line("Sign in required before launching DOOM.");
+        request_redraw_log_and_status();
+        return;
+    }
+    if (s_pending_kernel_action != CLI_ACTION_NONE) {
+        log_push_line("Kernel action pending: try launching DOOM again.");
+        request_redraw_log_and_status();
+        return;
+    }
+
+    s_pending_kernel_action = CLI_ACTION_LAUNCH_DOOM;
+    log_push_line("launching id Software DOOM...");
+    request_redraw_log_and_status();
 }
 
 static void wm_init_window(void) {
@@ -4541,7 +4558,7 @@ static void execute_start_menu_item(int item_idx) {
         const app_id app = (app_id)action;
         open_app_window(app);
         if (app == APP_DOOM) {
-            queue_command("doom");
+            queue_doom_launch_action();
         }
     }
 
@@ -4586,7 +4603,7 @@ static void execute_desktop_icon(int icon_idx) {
     const app_id app = kDesktopIconApps[icon_idx];
     open_app_window(app);
     if (app == APP_DOOM) {
-        queue_command("doom");
+        queue_doom_launch_action();
     }
 
     s_start_menu_open = false;
@@ -4601,7 +4618,7 @@ bool desktop_open_app_by_name(const char* name) {
 
     open_app_window(app);
     if (app == APP_DOOM) {
-        queue_command("doom");
+        queue_doom_launch_action();
     }
     return true;
 }
@@ -4806,7 +4823,7 @@ static bool handle_app_content_click(int app_idx) {
         return handle_editor_click(&content);
     }
     if (app_idx == APP_DOOM && rect_contains(content, s_mouse_x, s_mouse_y)) {
-        queue_command("doom");
+        queue_doom_launch_action();
         return true;
     }
     if (app_idx == APP_CALCULATOR) {
@@ -4977,7 +4994,7 @@ static void process_pointer_events(bool prev_left_down, bool left_down) {
         }
         if (rect_contains(l.quick_doom_button, s_mouse_x, s_mouse_y)) {
             open_app_window(APP_DOOM);
-            queue_command("doom");
+            queue_doom_launch_action();
             return;
         }
 
